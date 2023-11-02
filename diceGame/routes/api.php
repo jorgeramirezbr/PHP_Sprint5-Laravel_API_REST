@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/players', [UserController::class, 'store']);
 Route::put('/players/{id}', [UserController::class, 'update']);
+
+Route::post('players/{id}/games/', [GameController::class, 'store']);
