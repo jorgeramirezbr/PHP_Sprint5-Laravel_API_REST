@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nickname');
             $table->string('email')->unique();
-            $table->float('succes_percentage')->nullable();
+            $table->float('success_percentage')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

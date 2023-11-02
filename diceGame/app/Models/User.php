@@ -27,6 +27,7 @@ class User extends Authenticatable
         'nickname',
         'email',
         'password',
+        'success_percentage'
     ];
 
     /**
@@ -62,5 +63,19 @@ class User extends Authenticatable
     public function games()
     {
         return $this->hasMany(Game::class, 'player_id');
+    }
+
+    public function updateSuccessPercentage()
+    {
+        $gamesWon = $this->games()->where('game_result', 'won')->count();
+        $totalGames = $this->games->count();
+
+        if ($totalGames > 0) {
+            $this->success_percentage = ($gamesWon / $totalGames) * 100;
+        } else {
+            $this->success_percentage = 0;
+        }
+
+        $this->save();
     }
 }

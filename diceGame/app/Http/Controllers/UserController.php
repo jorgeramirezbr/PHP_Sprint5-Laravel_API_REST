@@ -9,9 +9,13 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function index(){
+        $users = User::select('id', 'nickname', 'success_percentage')->get();
+        return response()->json($users);
+    }
+
     public function store(StoreUserRequest $request){
         $data = $request->validated();
-
         User::create($data);
     }
 

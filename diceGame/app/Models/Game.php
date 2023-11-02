@@ -21,9 +21,22 @@ class Game extends Model
             $game->dice2 = $dice2;
             $game->game_result = ($dice1 + $dice2 === 7) ? 'won' : 'lost';
         });
+
+        static::created(function ($game) {
+            // encuentra al usuario del juego
+            $user = User::find($game->player_id);
+            // actualiza el success_percentage del user cuando se crea un game
+            $user->updateSuccessPercentage();
+        });
+
+            // actualiza el success_percentage del user cuando se elimina un game
+        static::deleted(function ($game) {
+            $user = User::find($game->player_id);        
+            $user->updateSuccessPercentage();
+        });
     }
 
-    public function user()
+    public function player()
     {
         return $this->belongsTo(User::class, 'id');
     }
