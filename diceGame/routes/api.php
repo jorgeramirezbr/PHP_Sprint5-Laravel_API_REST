@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/players', [UserController::class, 'store']);
+Route::put('/players/{id}', [UserController::class, 'update']);

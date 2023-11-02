@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -12,5 +13,11 @@ class UserController extends Controller
         $data = $request->validated();
 
         User::create($data);
+    }
+
+    public function update(UpdateUserRequest $request, $id){
+        $user = User::find($id);
+        $user->nickname = $request->input('nickname');
+        $user->save();
     }
 }
