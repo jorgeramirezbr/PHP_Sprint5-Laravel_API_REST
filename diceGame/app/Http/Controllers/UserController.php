@@ -24,4 +24,15 @@ class UserController extends Controller
         $user->nickname = $request->input('nickname');
         $user->save();
     }
+
+    public function show($id){
+        $user = User::with('games')->find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'El usuario no existe.'], 404);
+        }
+
+        $games = $user->games;
+        return response()->json($games);
+    }
 }
