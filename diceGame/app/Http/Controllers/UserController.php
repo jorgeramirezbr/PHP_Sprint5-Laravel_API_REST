@@ -58,4 +58,16 @@ class UserController extends Controller
 
         return response()->json($loser);
     }
+
+    public function getWinner()
+    {
+        // no consideramos a los jugadores con 'success_percentage' null
+        $winner = User::whereNotNull('success_percentage')->orderBy('success_percentage', 'desc')->first();
+
+        if (!$winner) {
+            return response()->json(['message' => 'No players found.'], 404);
+        }
+
+        return response()->json($winner);
+    }
 }
