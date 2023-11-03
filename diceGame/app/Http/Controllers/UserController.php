@@ -46,4 +46,16 @@ class UserController extends Controller
             'ranked_players' => $rankedPlayers,
         ]);
     }
+
+    public function getLoser()
+    {
+        // no considero a los jugadores que tienen 'succes_percentage' de null, ya que no han participado en ningun juego y no lo consideraria el PEOR
+        $loser = User::whereNotNull('success_percentage')->orderBy('success_percentage', 'asc')->first();  
+
+        if (!$loser) {
+            return response()->json(['message' => 'No players found.'], 404);
+        }
+
+        return response()->json($loser);
+    }
 }

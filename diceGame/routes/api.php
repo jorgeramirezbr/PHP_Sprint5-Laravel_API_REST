@@ -29,3 +29,4 @@ Route::get('/players', [UserController::class, 'index']);
 Route::get('players/{id}/games', [UserController::class, 'show']);
 
 Route::get('/players/ranking', [UserController::class, 'ranking']);
+Route::get('/players/ranking/loser', [UserController::class, 'getLoser']);
