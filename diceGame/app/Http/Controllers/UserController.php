@@ -35,4 +35,15 @@ class UserController extends Controller
         $games = $user->games;
         return response()->json($games);
     }
+
+    public function ranking()
+    {
+        $averageSuccessPercentage = User::average('success_percentage');
+        $rankedPlayers = User::orderBy('success_percentage', 'desc')->get();
+
+        return response()->json([
+            'average_success_percentage' => $averageSuccessPercentage,
+            'ranked_players' => $rankedPlayers,
+        ]);
+    }
 }

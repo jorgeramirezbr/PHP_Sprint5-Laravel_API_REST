@@ -27,3 +27,5 @@ Route::post('players/{id}/games/', [GameController::class, 'store']);
 Route::delete('players/{id}/games', [GameController::class, 'destroy']);
 Route::get('/players', [UserController::class, 'index']);
 Route::get('players/{id}/games', [UserController::class, 'show']);
+
+Route::get('/players/ranking', [UserController::class, 'ranking']);

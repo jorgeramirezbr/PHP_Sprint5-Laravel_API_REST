@@ -73,7 +73,7 @@ class User extends Authenticatable
         if ($totalGames > 0) {
             $this->success_percentage = ($gamesWon / $totalGames) * 100;
         } else {
-            $this->success_percentage = 0;
+            $this->success_percentage = null;
         }
 
         $this->save();
