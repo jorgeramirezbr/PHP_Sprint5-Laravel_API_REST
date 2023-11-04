@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserCreated;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
@@ -16,7 +17,8 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request){
         $data = $request->validated();
-        User::create($data);
+        $user = User::create($data);
+        event(new UserCreated($user)); 
     }
 
     public function update(UpdateUserRequest $request, $id){
