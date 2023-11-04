@@ -17,12 +17,14 @@ class UserSeeder extends Seeder
             'nickname'=>'Jorge',
             'email'=>'jorge@mail.com',
             'password'=>bcrypt('123456')
-        ])->assignRole('Admin');   //  me asigno como Admin
+        ])->syncRoles(['Admin', 'Player']);   //  me asigno como Admin
+
         User::create([
             'nickname'=>'Ruben',
             'email'=>'ruben@mail.com',
             'password'=>bcrypt('123456')
-        ])->assignRole('Admin'); // asigno al tutor Ruben como Admin
+        ])->syncRoles(['Admin', 'Player']); // asigno al tutor Ruben como Admin
+
         User::factory(9)->create();  //todos tendran el mismo password
          
     }
