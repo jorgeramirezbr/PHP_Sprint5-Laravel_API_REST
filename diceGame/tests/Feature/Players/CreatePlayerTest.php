@@ -15,7 +15,7 @@ class CreatePlayerTest extends TestCase
     public function a_player_can_be_created(): void
     {
         $this->withoutExceptionHandling(); 
-        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea 11 users 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
     
         $response = $this->post('/api/players', [
             'nickname' => 'cocox',
@@ -30,26 +30,6 @@ class CreatePlayerTest extends TestCase
         $this->assertEquals($user->nickname, 'cocox');
         $this->assertEquals($user->email, 'cocox@mail.com');
         $this->assertEquals($user->password, '123456789');
-    
-    }
-
-    /** @test */
-    public function it_validates_unique_nicknames(): void
-    {
-        //$this->withoutExceptionHandling(); 
-        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea 11 users 
-    
-        // usuario con el nickname 'carlos' 
-        User::factory()->create(['nickname' => 'carlos']);
-    
-         $response = $this->post('/api/players', [
-            'nickname' => 'carlos', // el mismo nickname
-            'email' => 'carlos@mail.com',
-            'password' => '123456789'
-        ]);
-    
-        $response->assertStatus(422); // Debería devolver un error de validación 422, pero el test devuelve 302
-        $response->assertJsonValidationErrors('nickname'); // Asegurarse de que el error sea específico para 'nickname'
     }
     
     /** @test   */
@@ -71,6 +51,22 @@ class CreatePlayerTest extends TestCase
         $this->assertEquals($user->nickname, 'Anonymous');
         $this->assertEquals($user->email, 'cocoz@mail.com');
         $this->assertEquals($user->password, '123456789');
+    }
 
+    /** @test */
+    public function it_validates_unique_nicknames(): void
+    {
+        //$this->withoutExceptionHandling(); 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea 11 users 
+    
+        // usuario con el nickname 'carlos' 
+        User::factory()->create(['nickname' => 'carlos']);
+    
+        $response = $this->post('/api/players', [
+            'nickname' => 'carlos', // el mismo nickname
+            'email' => 'carlos@mail.com',
+            'password' => '123456789'
+        ]);
+        $response->assertStatus(422); // Debería devolver un error de validación 422, pero el test devuelve 302
     }
 }

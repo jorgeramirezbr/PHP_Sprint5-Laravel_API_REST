@@ -15,19 +15,17 @@ class UpdatePlayerTest extends TestCase
     public function nickname_can_be_changed(): void
     {
         $this->withoutExceptionHandling(); 
-        $user = User::factory()->create([
-            'email' => 'coco@mail.com',
-        ]);
-        //$user = User::first();
-        $response = $this->put('/api/players/'.$user->id, [
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
+
+        $user = User::where('nickname', 'Jorge')->first(); //asignado como admin por el seeder
+        $response = $this->actingAs($user)->put('/api/players/'.$user->id, [
             'nickname' => 'coco'
         ]);
 
         $response->assertStatus(200);
-        $this->assertCount(1, User::all());
         $updateduser = User::first();
 
         $this->assertEquals($updateduser->nickname, 'coco'); //cambia el nick
-        $this->assertEquals($user->email, 'coco@mail.com');  //email permanece
+        $this->assertEquals($user->email, 'jorge@mail.com');  //email permanece
     }
 }

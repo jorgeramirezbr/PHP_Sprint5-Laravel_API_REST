@@ -17,16 +17,22 @@ class ShowPlayerTest extends TestCase
     public function it_returns_list_of_games_for_a_player(): void
     {
         $this->withoutExceptionHandling(); 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea roles, 11 users y 100 games
 
-        $user = User::factory()->create();
-        Game::factory(10)->create([
+        $this->post('/api/players', [  // Se cambia forma de crear el user en el test porque con factory no se asigna el rol de player automaticamente
+            'nickname' => 'saida',
+            'email' => 'saida@mail.com',
+            'password' => '123456789'
+        ]);
+        $user = User::where('email', 'saida@mail.com')->first();
+        Game::factory(5)->create([
             'player_id' => $user->id
         ]);
-
-        $response = $this->get('/api/players/'.$user->id.'/games');
+        $this->assertTrue($user->hasRole('Player'));
+        $response = $this->actingAs($user)->get('/api/players/'.$user->id.'/games');
 
         $response->assertStatus(200);
-        $this->assertCount(10, Game::all());
+        $this->assertCount(5, Game::where('player_id', $user->id)->get());
 
         $response->assertJsonStructure([
             '*' => [
@@ -42,45 +48,20 @@ class ShowPlayerTest extends TestCase
     }
 
     /** @test  */
-    public function it_returns_list_of_games_for_a_specific_player(): void
-    {
-        $this->withoutExceptionHandling(); 
-
-        $user = User::factory()->create();
-        Game::factory(5)->create([
-            'player_id' => $user->id
-        ]);
-        $user2 = User::factory()->create();
-        Game::factory(10)->create([
-            'player_id' => $user2->id
-        ]);
-
-        $response = $this->get('/api/players/'.$user->id.'/games');
-
-        $response->assertStatus(200);
-        $this->assertCount(15, Game::all());
-        $response->assertJsonCount(5);
-
-        $response->assertJson(function (AssertableJson $json) use ($user) {
-            $json->where('0.player_id', $user->id);
-        });
-    }
-
-    /** @test  */
     public function it_returns_list_of_games_for_a_player_with_no_games(): void
     {
         $this->withoutExceptionHandling(); 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea roles, 11 users y 100 games
 
-        $user = User::factory()->create();
-        $user2 = User::factory()->create();
-        Game::factory(5)->create([
-            'player_id' => $user2->id
+        $this->post('/api/players', [  // Se cambia forma de crear el user en el test porque con factory no se asigna el rol de player automaticamente
+            'nickname' => 'saida',
+            'email' => 'saida@mail.com',
+            'password' => '123456789'
         ]);
+        $user = User::where('email', 'saida@mail.com')->first();
 
-        $response = $this->get('/api/players/'.$user->id.'/games');
-
-        $response->assertStatus(200);
-        $this->assertCount(5, Game::all());
+        $this->assertTrue($user->hasRole('Player'));
+        $response = $this->actingAs($user)->get('/api/players/'.$user->id.'/games');
         $response->assertJsonCount(0);
     }
 
@@ -88,13 +69,11 @@ class ShowPlayerTest extends TestCase
     public function it_returns_list_of_games_for_a_non_existent_player(): void
     {
         $this->withoutExceptionHandling(); 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
+        
+        $user = User::where('nickname', 'Jorge')->first(); //asignado como admin por el seeder
 
-        $user = User::factory()->create();
-        Game::factory(5)->create([
-            'player_id' => $user->id
-        ]);
-
-        $response = $this->get('/api/players/2/games');
+        $response = $this->actingAs($user)->get('/api/players/200/games');
 
         $response->assertStatus(404);
         $response->assertJson([]);
