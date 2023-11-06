@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Game;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,7 +27,8 @@ class GameFactory extends Factory
                 return ($sum === 7) ? 'won' : 'lost';
             },
             'player_id' => function () {
-                return \App\Models\User::factory()->create()->id;
+                $player_id = User::inRandomOrder()->value('id');  //usa id de users existentes, aleatoriamente
+                return $player_id;
             }
         ];
     }
