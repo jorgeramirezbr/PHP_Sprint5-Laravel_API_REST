@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class ShowPlayerTest extends TestCase
@@ -14,25 +15,18 @@ class ShowPlayerTest extends TestCase
     use RefreshDatabase; 
     
     /** @test  */
-    public function it_returns_list_of_games_for_a_player(): void
+    public function list_of_games_for_another_player_can_be_retrieved_by_an_admin(): void
     {
-        $this->withoutExceptionHandling(); 
-        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea roles, 11 users y 100 games
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
 
-        $this->post('/api/players', [  // Se cambia forma de crear el user en el test porque con factory no se asigna el rol de player automaticamente
-            'nickname' => 'saida',
-            'email' => 'saida@mail.com',
-            'password' => '123456789'
-        ]);
-        $user = User::where('email', 'saida@mail.com')->first();
-        Game::factory(5)->create([
-            'player_id' => $user->id
-        ]);
-        $this->assertTrue($user->hasRole('Player'));
-        $response = $this->actingAs($user)->get('/api/players/'.$user->id.'/games');
+        Passport::actingAs(
+            User::factory()->create(),
+            ['Admin']
+        );
+
+        $response = $this->get('/api/players/11/games'); //pide al player 11 especificamente
 
         $response->assertStatus(200);
-        $this->assertCount(5, Game::where('player_id', $user->id)->get());
 
         $response->assertJsonStructure([
             '*' => [
@@ -48,20 +42,32 @@ class ShowPlayerTest extends TestCase
     }
 
     /** @test  */
-    public function it_returns_list_of_games_for_a_player_with_no_games(): void
+    public function list_of_games_for_another_player_cannot_be_retrieved_by_a_player(): void
     {
-        $this->withoutExceptionHandling(); 
-        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea roles, 11 users y 100 games
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
 
-        $this->post('/api/players', [  // Se cambia forma de crear el user en el test porque con factory no se asigna el rol de player automaticamente
-            'nickname' => 'saida',
-            'email' => 'saida@mail.com',
-            'password' => '123456789'
-        ]);
-        $user = User::where('email', 'saida@mail.com')->first();
+        Passport::actingAs(
+            User::factory()->create(),
+            ['Player']
+        );
 
-        $this->assertTrue($user->hasRole('Player'));
-        $response = $this->actingAs($user)->get('/api/players/'.$user->id.'/games');
+        $response = $this->get('/api/players/11/games'); //pide al player 11 especificamente
+
+        $response->assertStatus(403);
+    }
+
+    /** @test  */
+    public function it_returns_list_of_games_for_the_same_player_with_no_games(): void
+    {
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
+
+        Passport::actingAs(
+            $user = User::factory()->create(),
+            ['Player']
+        );
+
+        $this->assertEquals(12, $user->id);
+        $response = $this->get('/api/players/12/games');
         $response->assertJsonCount(0);
     }
 

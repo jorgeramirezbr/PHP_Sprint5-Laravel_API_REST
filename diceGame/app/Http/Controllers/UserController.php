@@ -47,12 +47,18 @@ class UserController extends Controller
         if (!$user) {
             return response()->json(['error' => 'El usuario no existe.'], 404);
         }
-        // verificar si el usuario autenticado es un administrador o si el ID coincide con el suyo
-        if ($request->user()->tokenCan('Admin') || $request->user()->id === $id) {
+        // verificar si el usuario autenticado es un administrador 
+        if ($request->user()->tokenCan('Admin')) { 
+            $games = $user->games;
+            return response()->json($games);
+        } elseif ($request->user()->tokenCan('Player')) {
+            if ($user->id !== $request->user()->id) {   //un player solo puede ver sus propios juegos
+                return response()->json(['error' => 'No tienes permiso para mostrar los juegos de otro jugador.'], 403);
+            }
             $games = $user->games;
             return response()->json($games);
         } else {
-            return response()->json(['error' => 'No tienes permiso para ver los juegos de este usuario.'], 403);
+            return response()->json(['error' => 'No tienes permisos para esta solicitud.'], 403);
         }
     }
 
