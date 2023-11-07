@@ -4,6 +4,7 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Passport::tokensCan([
+            'Player' =>  'players.update', 'games.store', 'games.destroy', 'players.show',
+            'Admin' => 'players.index', 'players.ranking', 'players.getLoser', 'players.getWinner', 'players.update', 'games.store', 'games.destroy', 'players.show',
+        ]);
     }
 }

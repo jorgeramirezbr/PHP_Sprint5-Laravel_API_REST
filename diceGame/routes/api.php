@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\LoginControlller;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/login', [LoginControlller::class, 'login'])->name('login');
 
 Route::post('/players', [UserController::class, 'store'])->name('players.store');
 Route::get('/players', [UserController::class, 'index'])->middleware('can:players.index')->name('players.index');
