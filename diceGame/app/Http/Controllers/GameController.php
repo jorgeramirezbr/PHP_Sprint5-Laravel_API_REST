@@ -9,28 +9,39 @@ use Illuminate\Http\Request;
 class GameController extends Controller
 {
     
-    public function store($id){
-        // Busca el usuario con el ID 
-        $user = User::find($id);
-
-        // Verifica si existe.
-        if (!$user) {
+    public function store($id, Request $request){
+        $user = $request->user();  // usuario autenticado
+        // buscamos el usuario que va a lanzar el juego con el ID
+        $player = User::find($id);
+    
+        if (!$player) {
             return response()->json(['error' => 'El usuario no existe.'], 404);
         }
+        // vemos si el usuario autenticado es el mismo que el jugador al que se quiere asignar el juego
+        if ($user->id !== $player->id) {
+            return response()->json(['error' => 'No tienes permiso para asignar un juego a este jugador.'], 403);
+        }
+    
         $game = new Game();
         $game->player_id = $id;
         $game->save();
+        return response()->json(['message' => 'Juego asignado correctamente.']);
     }
 
-    public function destroy($id){
-        $user = User::find($id);
-
-        if (!$user) {
+    public function destroy($id, Request $request){
+        $user = $request->user();  // usuario autenticado
+        // busca el usuario con el ID
+        $player = User::find($id);
+        if (!$player) {
             return response()->json(['error' => 'El usuario no existe.'], 404);
         }
-
-        $user->games()->delete();
-
-        return response()->json(['message' => 'Juegos eliminados correctamente.']);
+        // Comprueba si el usuario autenticado es el mismo que el jugador al que se quiere eliminar los juegos,
+        // o si el usuario autenticado es un administrador
+        if ($user->id === $player->id || $user->tokenCan('Admin')) {
+            $player->games()->delete();
+            return response()->json(['message' => 'Juegos eliminados correctamente.']);
+        } else {
+            return response()->json(['error' => 'No tienes permiso para eliminar los juegos de este jugador.'], 403);
+        }
     }
 }

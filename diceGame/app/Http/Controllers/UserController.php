@@ -10,32 +10,50 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index(){
-        $users = User::select('id', 'nickname', 'success_percentage')->get();
-        return response()->json($users);
+    public function index(Request $request){
+        if ($request->user()->tokenCan('Admin')) {
+            $users = User::select('id', 'nickname', 'success_percentage')->get();
+            return response()->json($users);
+        }   
     }
 
     public function store(StoreUserRequest $request){
         $data = $request->validated();
         $user = User::create($data);
         event(new UserCreated($user)); 
+        return response()->json($user);
     }
 
     public function update(UpdateUserRequest $request, $id){
         $user = User::find($id);
-        $user->nickname = $request->input('nickname');
+        
+        if ($request->user()->tokenCan('Admin')) {
+            $user->nickname = $request->input('nickname');
+        } elseif ($request->user()->tokenCan('Player')) {
+            // un Player solo puede actualizar su propio nickname
+            if ($user->id !== $request->user()->id) {
+                return response()->json(['error' => 'No tienes permiso para actualizar este usuario.'], 403);
+            }
+            $user->nickname = $request->input('nickname');
+        } else {
+            return response()->json(['error' => 'No tienes permiso para realizar esta acción.'], 403);
+        }        
         $user->save();
     }
 
-    public function show($id){
+    public function show($id, Request $request){
         $user = User::with('games')->find($id);
-
+    
         if (!$user) {
             return response()->json(['error' => 'El usuario no existe.'], 404);
         }
-
-        $games = $user->games;
-        return response()->json($games);
+        // verificar si el usuario autenticado es un administrador o si el ID coincide con el suyo
+        if ($request->user()->tokenCan('Admin') || $request->user()->id === $id) {
+            $games = $user->games;
+            return response()->json($games);
+        } else {
+            return response()->json(['error' => 'No tienes permiso para ver los juegos de este usuario.'], 403);
+        }
     }
 
     public function ranking()
