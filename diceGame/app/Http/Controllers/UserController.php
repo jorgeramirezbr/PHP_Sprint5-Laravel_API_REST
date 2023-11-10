@@ -7,6 +7,8 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -17,11 +19,32 @@ class UserController extends Controller
         }   
     }
 
-    public function store(StoreUserRequest $request){
-        $data = $request->validated();
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nickname' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('users')->where(function ($query) {
+                    return $query->where('nickname', request('nickname'))->orWhereNull('nickname');
+                }),
+            ],
+            'email' => 'required|email|unique:users',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Los datos no son válidos.', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->all();
+        $data['nickname'] = $data['nickname'] ?? 'Anonymous';
+
         $user = User::create($data);
-        event(new UserCreated($user)); 
-        return response()->json($user);
+        event(new UserCreated($user));
+
+        return response()->json($user, 200);
     }
 
     public function update(UpdateUserRequest $request, $id){
@@ -29,13 +52,15 @@ class UserController extends Controller
         
         if ($request->user()->tokenCan('Admin')) {
             $user->nickname = $request->input('nickname');
-        } elseif ($request->user()->tokenCan('Player')) {
+        } 
+        elseif ($request->user()->tokenCan('Player')) {
             // un Player solo puede actualizar su propio nickname
             if ($user->id !== $request->user()->id) {
                 return response()->json(['error' => 'No tienes permiso para actualizar este usuario.'], 403);
             }
             $user->nickname = $request->input('nickname');
-        } else {
+        } 
+        else {
             return response()->json(['error' => 'No tienes permiso para realizar esta acción.'], 403);
         }        
         $user->save();
