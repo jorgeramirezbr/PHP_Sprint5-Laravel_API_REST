@@ -24,11 +24,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [LoginControlller::class, 'login'])->name('login');
 Route::post('/players', [UserController::class, 'store'])->name('players.store');
 
-Route::middleware(['auth:api', 'scope:Admin, Player'])->group(function () {
+Route::middleware('auth:api', 'scope:Player,Admin')->group(function () {
     Route::put('/players/{id}', [UserController::class, 'update'])->name('players.update');
-    Route::get('players/{id}/games', [UserController::class, 'show'])->name('players.show');
-    Route::post('players/{id}/games/', [GameController::class, 'store'])->name('games.store');
-    Route::delete('players/{id}/games', [GameController::class, 'destroy'])->name('games.destroy');
+    Route::get('/players/{id}/games', [UserController::class, 'show'])->name('players.show');
+    Route::post('players/{id}/games', [GameController::class, 'store'])->name('games.store');
+    Route::delete('/players/{id}/games', [GameController::class, 'destroy'])->name('games.destroy');
 });
 
 Route::middleware('auth:api', 'scope:Admin')->group(function () {
