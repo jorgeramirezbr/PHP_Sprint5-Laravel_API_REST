@@ -53,6 +53,48 @@ class CreatePlayerTest extends TestCase
         $this->assertEquals($user->password, '123456789');
     }
 
+    /** @test   */
+    public function it_validates_empty_nicknames(): void
+    {
+        $this->withoutExceptionHandling(); 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea 11 users 
+
+        $response = $this->post('/api/players', [
+            'nickname' => '',
+            'email' => 'cocoz@mail.com',
+            'password' => '123456789'
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertCount(12, User::all());
+
+        $user = User::find(12);
+        $this->assertEquals($user->nickname, 'Anonymous');
+        $this->assertEquals($user->email, 'cocoz@mail.com');
+        $this->assertEquals($user->password, '123456789');
+    }
+
+    /** @test   */
+    public function it_validates_Anonymous_nicknames(): void
+    {
+        $this->withoutExceptionHandling(); 
+        $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea 11 users 
+
+        $response = $this->post('/api/players', [
+            'nickname' => 'Anonymous',
+            'email' => 'cocoz@mail.com',
+            'password' => '123456789'
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertCount(12, User::all());
+
+        $user = User::find(12);
+        $this->assertEquals($user->nickname, 'Anonymous');
+        $this->assertEquals($user->email, 'cocoz@mail.com');
+        $this->assertEquals($user->password, '123456789');
+    }
+
     /** @test */
     public function it_validates_unique_nicknames(): void
     {
@@ -67,6 +109,22 @@ class CreatePlayerTest extends TestCase
             'email' => 'carlos@mail.com',
             'password' => '123456789'
         ]);
-        $response->assertStatus(422); // Debería devolver un error de validación 422, pero el test devuelve 302
+        //$response->assertStatus(302); // Debería redirigirse
+        //$response->assertRedirect('/'); // Verifica la ubicación de redirección
+        $response->assertStatus(422); 
+        $response->assertJsonStructure([
+            'error',
+            'message',
+            'errors' => [
+                'nickname',
+            ],
+        ]);
+        $response->assertJson([
+            'error' => 'Los datos no son válidos.',
+            'message' => 'Validation failed',
+            'errors' => [
+                'nickname' => ['The nickname has already been taken.'],
+            ],
+        ]);
     }
 }

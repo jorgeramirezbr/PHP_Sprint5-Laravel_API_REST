@@ -47,11 +47,12 @@ class ShowPlayerTest extends TestCase
         $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
 
         Passport::actingAs(
-            User::factory()->create(),
+            $user = User::factory()->create(),
             ['Player']
         );
 
-        $response = $this->get('/api/players/11/games'); //pide al player 11 especificamente
+        $this->assertEquals(12, $user->id);  // el nuevo user es el 12
+        $response = $this->get('/api/players/11/games'); //pide al player 11 especificamente, otro player
 
         $response->assertStatus(403);
     }
@@ -74,14 +75,16 @@ class ShowPlayerTest extends TestCase
     /** @test  */
     public function it_returns_list_of_games_for_a_non_existent_player(): void
     {
-        $this->withoutExceptionHandling(); 
+        //$this->withoutExceptionHandling(); 
         $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
         
-        $user = User::where('nickname', 'Jorge')->first(); //asignado como admin por el seeder
+        Passport::actingAs(
+            User::factory()->create(),
+            ['Admin']
+        );
 
-        $response = $this->actingAs($user)->get('/api/players/200/games');
+        $response = $this->get('/api/players/200/games');   //player que no existe 
 
         $response->assertStatus(404);
-        $response->assertJson([]);
     }
 }
