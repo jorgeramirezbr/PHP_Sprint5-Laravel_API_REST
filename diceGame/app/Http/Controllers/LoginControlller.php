@@ -27,7 +27,7 @@ class LoginControlller extends Controller
         if (!Auth::attempt($login)) {
             return response(['message' =>'Invalid password'], 401);
         }
-
+        
         $scope = []; 
         if ($user->hasRole('Admin')) {
             $scope[] = 'Admin';

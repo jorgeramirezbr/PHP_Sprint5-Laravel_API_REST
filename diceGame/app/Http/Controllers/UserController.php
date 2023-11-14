@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -40,6 +41,7 @@ class UserController extends Controller
 
         $data = $request->all();
         $data['nickname'] = $data['nickname'] ?? 'Anonymous';
+        $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
         event(new UserCreated($user));
