@@ -32,11 +32,15 @@ class UserController extends Controller
                 }),
             ],
             'email' => 'required|email|unique:users',
-            'password' => 'required',
+            'password' => [
+                'required',
+                'min:9',  
+                'regex:/^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/', // al menos un carácter especial
+            ],
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => 'Los datos no son válidos.', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+            return response()->json(['error' => 'Los datos no son válidos. El password debe tener al menos un caracter especial', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
         }
 
         $data = $request->all();

@@ -25,7 +25,7 @@ class LoginTest extends TestCase
         $this->post('/api/players', [
             'nickname' => 'cocox',
             'email' => 'cocox@mail.com',
-            'password' => bcrypt('123456789')
+            'password' => '123456789@'
         ]);
 
         /* $user = User::find(12);  //  el nuevo user es el 12
@@ -43,7 +43,7 @@ class LoginTest extends TestCase
         $this->artisan('passport:install');
         $response = $this->post('/api/login', [
             'email' => 'cocox@mail.com',
-            'password' => '123456789'
+            'password' => '123456789@'
         ]);
 
         $response->assertStatus(200);
@@ -58,7 +58,7 @@ class LoginTest extends TestCase
     {
         $response = $this->post('/api/login', [
             'email' => 'cocox@mail.com',
-            'password' => '123456788'    //password invalido
+            'password' => '123456788@'    //password invalido
         ]);
 
         $response->assertStatus(401);
@@ -70,7 +70,7 @@ class LoginTest extends TestCase
     {
         $response = $this->post('/api/login', [
             'email' => 'cocoZ@mail.com',   //email invalido
-            'password' => '123456789'    
+            'password' => '123456789@'    
         ]);
 
         $response->assertStatus(401);
@@ -83,7 +83,7 @@ class LoginTest extends TestCase
         $this->withoutExceptionHandling(); 
         $response = $this->post('/api/login', [
             'email' => null,   // email null
-            'password' => '123456789'    
+            'password' => '123456789@'    
         ]);
 
         $response->assertStatus(422);

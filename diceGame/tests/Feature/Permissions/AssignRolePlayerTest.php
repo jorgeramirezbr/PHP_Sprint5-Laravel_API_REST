@@ -21,7 +21,7 @@ class AssignRolePlayerTest extends TestCase
         $response = $this->post('/api/players', [  //este seria el user 12
             'nickname' => 'saida',
             'email' => 'saida@mail.com',
-            'password' => '123456789'
+            'password' => '123456789@'
         ]);
 
         $response->assertStatus(200);
