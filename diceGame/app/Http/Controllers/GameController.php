@@ -25,7 +25,13 @@ class GameController extends Controller
         $game = new Game();
         $game->player_id = $id;
         $game->save();
-        return response()->json(['message' => 'Juego asignado correctamente.']);
+        $game = Game::find($game->id);
+        $gameData = [
+            'dice1' => $game->dice1,
+            'dice2' => $game->dice2,
+            'game_result' => $game->game_result,
+        ];
+        return response()->json(['message' => 'Juego asignado correctamente.', 'game' => $gameData]);
     }
 
     public function destroy($id, Request $request){
