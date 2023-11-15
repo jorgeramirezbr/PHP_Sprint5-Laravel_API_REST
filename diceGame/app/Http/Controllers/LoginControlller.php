@@ -35,6 +35,11 @@ class LoginControlller extends Controller
             $scope[] = 'Player';
         } 
         $accessToken = $user->createToken('authToken', $scope)->accessToken;
+        $user = [
+            'id' => $user->id,
+            'nickname' => $user->nickname,
+            'success_percentage' => $user->success_percentage,
+        ];
     
         return response(['user' => $user, 'access_token' => $accessToken]);
     }
