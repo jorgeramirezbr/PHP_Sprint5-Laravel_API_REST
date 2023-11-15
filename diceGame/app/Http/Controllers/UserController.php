@@ -53,8 +53,33 @@ class UserController extends Controller
         return response()->json($user, 200);
     }
 
-    public function update(UpdateUserRequest $request, $id){
+    public function update(Request $request, $id){
         $user = User::find($id);
+        if (!$user) {
+            return response(['message' =>'Usuario no encontrado en la base de datos'], 401);
+        }
+        $validationRules = [
+            'nickname' => [
+                'required',
+                'min:4',
+                'max:255',
+                Rule::unique('users', 'nickname')->ignore($id),
+                function ($attribute, $value, $fail) use ($id, $user) {
+                    // Verificar si el nickname es 'Anonymous' o es el mismo que el actual
+                    if ($value !== 'Anonymous' && User::where('nickname', $value)->where('id', '!=', $id)->exists()) {
+                        $fail('El nickname ya está en uso por otro usuario.');
+                    }
+                },
+            ],
+        ];
+        $validator = validator($request->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json(
+                ['message' => 'Validation failed', 'errors' => $validator->errors()],
+                422
+            );
+        }
         
         if ($request->user()->tokenCan('Admin')) {
             $user->nickname = $request->input('nickname');
@@ -70,6 +95,12 @@ class UserController extends Controller
             return response()->json(['error' => 'No tienes permiso para realizar esta acción.'], 403);
         }        
         $user->save();
+        $userData = [
+            'id' => $user->id,
+            'nickname' => $user->nickname,
+            'success_percentage' => $user->success_percentage,
+        ];
+        return response()->json(['message' => 'Nickname actualizado correctamente', 'user' => $userData]);
     }
 
     public function show($id, Request $request){

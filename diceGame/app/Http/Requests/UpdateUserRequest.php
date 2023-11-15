@@ -15,13 +15,13 @@ class UpdateUserRequest extends FormRequest
     {
         return true;
     }
-
-    public function prepareForValidation()
+    // Descomentar si se desea actualizar el nickname sin enviar un nuevo nickname, se le asignara por defecto 'Anonymous'
+    /* public function prepareForValidation()
     {
         $this->merge([
             'nickname' => $this->input('nickname') ?: 'Anonymous',
         ]);
-    }
+    } */
 
     /**
      * Get the validation rules that apply to the request.
@@ -32,7 +32,7 @@ class UpdateUserRequest extends FormRequest
     {
         $userId = $this->route('user');  //id del user de la ruta
         $rules = [
-            'nickname' => 'string|max:255',
+            'nickname' => 'required|string|max:255',
         ];
     
         // unique solo si el nickname no es 'Anonimous'
