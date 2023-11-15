@@ -95,7 +95,7 @@ class UpdatePlayerTest extends TestCase
     }
 
     /** @test   */
-    public function a_nickname_can_be_changed_with_null_nickname_by_his_player(): void
+    public function a_nickname_cannot_be_changed_with_null_nickname_by_his_player(): void
     {
         $this->withoutExceptionHandling(); 
         $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
@@ -109,14 +109,17 @@ class UpdatePlayerTest extends TestCase
             'nickname' => null
         ]); 
 
-        $response->assertStatus(200);
-        $updateduser = User::find(12);
-
-        $this->assertEquals($updateduser->nickname, 'Anonymous'); //cambia el nick
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'nickname',
+            ],
+        ]);
     }
 
     /** @test   */
-    public function a_nickname_can_be_changed_with_empty_nickname_by_his_player(): void
+    public function a_nickname_cannot_be_changed_with_empty_nickname_by_his_player(): void
     {
         $this->withoutExceptionHandling(); 
         $this->artisan('db:seed'); // Ejecuta todos los seeders, que crea permisos , 11 users y 100 games
@@ -130,10 +133,13 @@ class UpdatePlayerTest extends TestCase
             'nickname' => ''
         ]); 
 
-        $response->assertStatus(200);
-        $updateduser = User::find(12);
-
-        $this->assertEquals($updateduser->nickname, 'Anonymous'); //cambia el nick
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'nickname',
+            ],
+        ]);
     }
 
     /** @test   */
