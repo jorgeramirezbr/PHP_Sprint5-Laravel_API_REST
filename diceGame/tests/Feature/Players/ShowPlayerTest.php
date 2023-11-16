@@ -34,9 +34,7 @@ class ShowPlayerTest extends TestCase
                 'dice1',
                 'dice2',
                 'game_result',
-                'player_id',
-                'created_at',
-                'updated_at'
+                'created_at',                
             ],
         ]);
     }

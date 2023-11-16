@@ -111,13 +111,29 @@ class UserController extends Controller
         }
         // verificar si el usuario autenticado es un administrador 
         if ($request->user()->tokenCan('Admin')) { 
-            $games = $user->games;
+            $games = $user->games->map(function ($game) {
+                return [
+                    'id' => $game->id,
+                    'dice1' => $game->dice1,
+                    'dice2' => $game->dice2,
+                    'game_result' => $game->game_result,
+                    'created_at' => $game->created_at, // Si se desea retornar fecha de creación
+                ];
+            });
             return response()->json($games);
         } elseif ($request->user()->tokenCan('Player')) {
             if ($user->id !== $request->user()->id) {   //un player solo puede ver sus propios juegos
                 return response()->json(['error' => 'No tienes permiso para mostrar los juegos de otro jugador.'], 403);
             }
-            $games = $user->games;
+            $games = $user->games->map(function ($game) {
+                return [
+                    'id' => $game->id,
+                    'dice1' => $game->dice1,
+                    'dice2' => $game->dice2,
+                    'game_result' => $game->game_result,
+                    'created_at' => $game->created_at, // Si se desea retornar fecha de creación
+                ];
+            });
             return response()->json($games);
         } else {
             return response()->json(['error' => 'No tienes permisos para esta solicitud.'], 403);
